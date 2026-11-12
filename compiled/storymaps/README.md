@@ -57,3 +57,26 @@ This file is inside of a directory called 'storymaps'. Use this director to crea
   * description.json
   * resources (directory)
     * (your static files)
+
+## Launch this app
+Currently walking you though this is beyond the scope of this document, though in the near future we hope to provide a sample, simple NGINX config file template, if you wish to use NGINX to deploy your storymaps. See the ESRI-README.md file for their recommendations around serving.
+
+## Story ID and startup checks
+
+Open the application with `index.html?appid=<APP_ID>`. Supply exactly one
+32-character hexadecimal ArcGIS item ID. IDs in the URL are normalized to
+lowercase; name the corresponding story directory in lowercase.
+
+Startup checks require valid `description.json` and `data.json` files inside
+that directory. The description's `id` must match the folder name and include
+a numeric `created` timestamp. The data must contain the Cascade `values`
+configuration, settings, template, and nonempty sections.
+
+The application also checks the local copies of resources referenced by that
+story's ArcGIS item-resource URLs. The web server must support GET for JSON
+files and HEAD for resource files. Missing files, invalid data, and network
+errors stop startup and display an error. An unused resources directory cannot
+be verified by these file checks.
+
+These are startup checks only; loading the archived content into the viewer
+is a separate integration step.

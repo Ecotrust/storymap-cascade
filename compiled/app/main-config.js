@@ -1,3 +1,7 @@
+/*
+  This file has been modified from Esri's original version.
+  It now contains modifications to support local stories.
+*/
 (function() {
   function loadJS(url, isExternal) {
     var script = document.createElement('script');
@@ -60,6 +64,132 @@
     var pieces = jsapiUrl.split('/');
     // Take last piece.
     return pieces[pieces.length - 1];
+  }
+
+  function showLocalStoryError(message) {
+    console.error(message);
+    document.querySelector('#fatalError .error-title').textContent = 'Local story unavailable';
+    document.querySelector('#fatalError .error-msg').textContent = message;
+    document.querySelector('#fatalError').style.display = 'block';
+    ['#loadingOverlay', '#loadingIndicator', '#loadingMessage'].forEach(function(selector) {
+      document.querySelector(selector).style.display = 'none';
+    });
+  }
+
+  function checkLocalStory(ready) {
+    var params = new URLSearchParams(location.search);
+    var ids = params.getAll('appid');
+
+    if (!ids.length || !ids[0]) {
+      showLocalStoryError('Provide a story ID in the URL: ?appid=<32-character ArcGIS item ID>.');
+      return;
+    }
+
+    if (ids.length !== 1 || !/^[a-f0-9]{32}$/i.test(ids[0])) {
+      showLocalStoryError('Invalid appid. Provide exactly one ID containing 32 hexadecimal characters (0-9, a-f).');
+      return;
+    }
+
+    if (location.protocol !== 'http:' && location.protocol !== 'https:') {
+      showLocalStoryError('Open this application through an HTTP or HTTPS web server, not a local file.');
+      return;
+    }
+
+    app.localStoryId = ids[0].toLowerCase();
+    var baseUrl = 'storymaps/' + app.localStoryId + '/';
+    app.localStory = {
+      itemUrl: baseUrl + 'description.json',
+      dataUrl: baseUrl + 'data.json',
+      resourcesUrl: baseUrl + 'resources/'
+    };
+    app.indexCfg.appid = app.localStoryId;
+
+    function checkFile(url, method, loaded) {
+      var request = new XMLHttpRequest();
+      request.open(method, url, true);
+      request.timeout = 15000;
+      request.onload = function() {
+        if (request.status < 200 || request.status >= 300) {
+          showLocalStoryError('Could not access "' + url + '" (HTTP ' + request.status +
+            '). Check that the story files exist and the web server can serve them.');
+          return;
+        }
+        loaded(request.responseText);
+      };
+      request.onerror = function() {
+        showLocalStoryError('A network error prevented access to "' + url + '".');
+      };
+      request.ontimeout = function() {
+        showLocalStoryError('The request for "' + url + '" timed out.');
+      };
+      request.send();
+    }
+
+    function loadJSON(url, loaded) {
+      checkFile(url, 'GET', function(text) {
+        var value;
+        try {
+          value = JSON.parse(text);
+        }
+        catch (error) {
+          showLocalStoryError('Invalid JSON in "' + url + '": ' + error.message);
+          return;
+        }
+        loaded(value);
+      });
+    }
+
+    loadJSON(app.localStory.itemUrl, function(item) {
+      if (!item || item.id !== app.localStoryId || typeof item.created !== 'number') {
+        showLocalStoryError('Invalid metadata in "' + app.localStory.itemUrl +
+          '": the id must match the story folder and created must be a numeric timestamp.');
+        return;
+      }
+
+      loadJSON(app.localStory.dataUrl, function(data) {
+        var values = data && data.values;
+        if (!values || !values.config || !values.settings || !values.template ||
+            !Array.isArray(values.sections) || !values.sections.length) {
+          showLocalStoryError('Invalid Cascade data in "' + app.localStory.dataUrl +
+            '": expected values.config, settings, template, and nonempty sections.');
+          return;
+        }
+
+        var resources = [];
+        var resourcePattern = new RegExp(
+          '^(?:https?:)?//[^/]+/sharing/rest/content/items/' + app.localStoryId + '/resources/(.+)$'
+        );
+        function collectResources(value) {
+          if (Array.isArray(value)) {
+            value.forEach(collectResources);
+          }
+          else if (value && typeof value === 'object') {
+            Object.keys(value).forEach(function(key) {
+              collectResources(value[key]);
+            });
+          }
+          else if (typeof value === 'string') {
+            var match = value.match(resourcePattern);
+            if (match) {
+              var url = app.localStory.resourcesUrl + match[1];
+              if (resources.indexOf(url) === -1) {
+                resources.push(url);
+              }
+            }
+          }
+        }
+        collectResources(data);
+
+        function checkNextResource() {
+          if (!resources.length) {
+            ready();
+            return;
+          }
+          checkFile(resources.shift(), 'HEAD', checkNextResource);
+        }
+        checkNextResource();
+      });
+    });
   }
 
   function defineDojoConfig() {
@@ -173,6 +303,9 @@
   app.isInBuilder = !! app.isInBuilder;
   app.isPrint = (!!app.isPrint) && !app.isInBuilder;
 
+  checkLocalStory(startApplication);
+
+  function startApplication() {
   loadCSS(app.pathJSAPI3 + 'esri/css/esri.css', true);
   loadCSS(app.pathJSAPI3 + 'dijit/themes/claro/claro.css', true);
 
@@ -258,5 +391,6 @@
 
   if (! app.isProduction) {
     loadJS('//localhost:35729/livereload.js');
+  }
   }
 })();
