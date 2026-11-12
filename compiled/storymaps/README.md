@@ -29,16 +29,16 @@ JSON files contain a description about your storymap and a detailed breakdown of
     * copy all text and save it to a file called `description.json`
 * Click on 'Data'  in the top left
     * Copy all text and save it to a file called `data.json`
-    * NOTE: you need EVERY character exacly as written, so clicking inside the text and using `ctrl+a` to highlight all text and `ctrl+x` to copy it (or the Mac equivalent) will save you some grief.
+    * NOTE: you need EVERY character exacly as written, so clicking inside the text and using `ctrl+a` to highlight all text and `ctrl+c` to copy it (or the Mac equivalent) will save you some grief.
 #### Static Files
-Your storymap also likely relies on numerous maps and images to tell its story. You will need to download a copy of those as well.
+Your storymap also likely relies on numerous maps and images to tell its story. You will need to download a copy of images and static files for your server. There may be maps and other dependencies that still rely on ArcGIS services -- this is not a fully offline archive.
 * Still at 'ArcGIS Assistant' with your storymap selected:
    * Click on 'Resources' in the top right corner of your screen
    * Click on the blue 'Download All' button in the top left corner of your screen.
    * After some time (Esri will zip your files together) a download will begin and you will get a file called `resources.zip`
    * you will need this file in the next step.
 ### Organize your files
-A directory (folder) called `storymaps` should exist adjacent to this README.md file. It contains a README.md file as well. It also will contain a directory for each (Cascade) StoryMap you wish to serve.
+This file is inside of a directory called 'storymaps'. Use this director to create a directory for each (Cascade) StoryMap you wish to serve by App ID.
 
 * Create a directory with the name of your app ID
 * Move your `data.json` into it
@@ -46,11 +46,12 @@ A directory (folder) called `storymaps` should exist adjacent to this README.md 
 * Move your `resources.zip` file into it
    * If you already had a file named `resources.zip` in your downloads folder, this one may be appended with a number, like `resources(1).zip`.
    * Be sure to grab the file with a timestamp that matches when you downloaded this data from Esri to be sure you have the right one
-   * __Be sure to rename the file back to `resources.zip` if it does have that number!__
    * unzip `resources.zip` into this directory - it should create a folder called `resources`
+      * __Be sure to rename the filder to `resources` if it does have that number!__
+
 #### Confirm your file structure is correct:
 
-/path/to/storymap-cascade/compiled
+/path/to/storymap-cascade/compiled/storymaps/
 * \<APP ID> (directory)
   * data.json
   * description.json
