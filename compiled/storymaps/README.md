@@ -51,8 +51,8 @@ A directory (folder) called `storymaps` should exist adjacent to this README.md 
 #### Confirm your file structure is correct:
 
 /path/to/storymap-cascade/compiled
-|- <APP ID> (directory)
-  |- data.json
-  |- description.json
-  |- resources (directory)
-    | - (your static files)
+* \<APP ID> (directory)
+  * data.json
+  * description.json
+  * resources (directory)
+    * (your static files)

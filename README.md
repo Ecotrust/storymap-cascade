@@ -25,13 +25,13 @@ We hope to create similar forks for other types, starting with 'Journal'.
 ### Your App Id
 * Log in to your organization's AGOL site
 * navigate to 'Content' -> 'My content'
-    * https://<ORG>.maps.arcgis.com/home/content.html
+    * https://\<ORG>.maps.arcgis.com/home/content.html
 * Find your StoryMap ('Web mapping application')
 * Click on it to open it (or 'view details')
 * Find the 'URL' section in the right column
    * confirm it contains with 'Cascade' (this code only works with the 'Cascade' application type)
    * copy the long set of characters after 'appid'
-      * https://<ORG>.maps.arcgis.com/apps/Cascade/index.html?appid=<APP_ID>
+      * https://\<ORG>.maps.arcgis.com/apps/Cascade/index.html?appid=<APP_ID>
       * you will need to use this ID a lot later on, so keep it handy
 * At the bottom of the right column, note the 'Folder' field
 ### Your App files
@@ -69,8 +69,8 @@ A directory (folder) called `storymaps` should exist adjacent to this README.md 
 #### Confirm your file structure is correct:
 
 /path/to/storymap-cascade/compiled
-|- <APP ID> (directory)
-  |- data.json
-  |- description.json
-  |- resources (directory)
-    | - (your static files)
+* \<APP ID> (directory)
+  * data.json
+  * description.json
+  * resources (directory)
+    * (your static files)
